@@ -1555,6 +1555,9 @@ urls = {
         'annotations': 'https://www.ebi.ac.uk/interpro/api/entry/InterPro/'
             'protein/%s/taxonomy/uniprot/%s?page_size=%u',
         'interpro2go': 'https://current.geneontology.org/ontology/external2go/interpro2go',
+        'protein2ipr': 'https://ftp.ebi.ac.uk/pub/databases/'
+            'interpro/current_release/protein2ipr.dat.gz',
+      
     },
     'drugcentral': {
         'label': 'Drug-target interactions',

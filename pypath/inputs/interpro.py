@@ -348,10 +348,10 @@ def interpro_annotations(
     annotations = collections.defaultdict(set)
 
     # BULK DATA PATH
-    BULK_FILE_PATH = os.getenv(
-    "INTERPRO_BULK_PATH",
-    r"D:\derssel\CROSSBAR\protein2ipr.dat.gz"
-    )
+    BULK_FILE_PATH = os.getenv("INTERPRO_BULK_PATH")
+
+    if not BULK_FILE_PATH:
+        BULK_FILE_PATH = _download_protein2ipr_bulk_file()
 
     MAX_LINES = None  # set integer value for debugging
 
@@ -473,3 +473,16 @@ def interpro2go_annotations() -> dict[str, set[tuple]]:
                 continue
 
     return annotations
+def _download_protein2ipr_bulk_file():
+    """
+    Downloads the protein2ipr.dat.gz bulk file using pypath's curl
+    (with caching) and returns the local path to the downloaded file.
+    """
+
+    import pypath.share.curl as curl
+    import pypath.resources.urls as urls
+
+    bulk_url = urls.urls['interpro']['protein2ipr']
+    c = curl.Curl(bulk_url, silent=False, large=True, write_cache=True)
+
+    return c.cache_file_name
