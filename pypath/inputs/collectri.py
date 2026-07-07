@@ -23,8 +23,6 @@ from __future__ import annotations
 CollecTRI is a comprehensive resource of TF-target interactions.
 """
 
-from typing import Literal
-
 import re
 import collections
 import itertools
@@ -84,7 +82,7 @@ COMPLEXES = {
 def collectri_raw(
         protein_coding: bool = True,
         mirna: bool = False,
-    ) -> list[tuple]:
+    ):
     """
     TF-target interactions from the CollecTRI database.
 
@@ -120,22 +118,12 @@ def collectri_raw(
     )
     _ = next(c.result)
 
-    result = []
-    total_lines = 0 
-    parsed_lines = 0 
-
     for l in c.result:
-        total_lines += 1 
-        
-        
         fields = l.strip().split(',')
         if len(fields) < 7: 
-            _log(f"Uyarı: Hatalı satır atlanıyor: {l.strip()}")
+            _log(f"Skipping malformed line: {l.strip()}")
             continue
             
-        parsed_lines += 1 
-        
-       
         tf, target, effect, tf_cat, res, pmid, sign_dec = fields[:7]
         
         mmirna = remirna.match(target)
@@ -147,30 +135,22 @@ def collectri_raw(
 
         target_id = f'hsa-miR-{mmirna.group(1)}' if mmirna else target
 
-        result.append(
-            CollectriRecord(
-                tf = tf,
-                target = target_id,
-                effect = int(effect),
-                tf_category = tf_cat,
-                resources = res.replace('DoRothEA_A', 'DoRothEA-A'),
-                pubmed = pmid,
-                sign_decision = sign_dec,
-                target_type = 'mirna' if mmirna else 'protein',
-            )
+        yield CollectriRecord(
+            tf = tf,
+            target = target_id,
+            effect = int(effect),
+            tf_category = tf_cat,
+            resources = res.replace('DoRothEA_A', 'DoRothEA-A'),
+            pubmed = pmid,
+            sign_decision = sign_dec,
+            target_type = 'mirna' if mmirna else 'protein',
         )
-
-
-
-
-    
-    return result
 
 
 def collectri_interactions(
         protein_coding: bool = True,
         mirna: bool = False,
-    ) -> list[tuple]:
+    ):
     """
     TF-target interactions from the CollecTRI database.
 
@@ -213,8 +193,6 @@ def collectri_interactions(
         return set(result)
 
     
-    result = []
-
     for rec in collectri_raw(protein_coding=protein_coding, mirna=mirna):
         tf_uniprots = (
             process_complex(rec.tf)
@@ -235,7 +213,4 @@ def collectri_interactions(
                     sources='CollecTRI',
                 )
 
-           
-            result.append(CollectriInteraction(tf_u, t_u, *rec[2:]))
-
-    return result
+            yield CollectriInteraction(tf_u, t_u, *rec[2:])
