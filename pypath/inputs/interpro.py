@@ -398,7 +398,7 @@ def interpro_annotations(
 
     except Exception as e:
 
-        print(f"Bulk mode failed ({e}), falling back to API...")
+        _log(f"Bulk mode failed ({e}), falling back to API...")
 
         return _interpro_annotations_api(
             page_size=page_size,
